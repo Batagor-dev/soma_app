@@ -7,6 +7,7 @@ import '../../features/user/produk_screen.dart';
 import '../../features/user/transaksi_screen.dart';
 import '../../features/user/pengaturan_screen.dart';
 import '../../features/user/kasir_screen.dart';
+import '../../features/user/main_screen.dart';
 
 class Routes {
   static const String login = '/login';
@@ -20,10 +21,6 @@ class Routes {
   static Map<String, WidgetBuilder> routes = {
     login: (_) => const LoginScreen(),
     register: (_) => const RegisterScreen(),
-    home: (_) => const HomeScreen(),
-    produk: (_) => const ProdukScreen(),
-    transaksi: (_) => const TransaksiScreen(),
-    pengaturan: (_) => const PengaturanScreen(),
-    kasir: (_) => const KasirScreen(),
+    home: (_) => const MainScreen(),
   };
 }

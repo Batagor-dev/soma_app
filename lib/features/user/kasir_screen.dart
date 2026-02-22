@@ -5,10 +5,8 @@ class KasirScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Halaman Kasir'),
-      ),
+    return const Center(
+      child: Text('Halaman Kasir'),
     );
   }
 }

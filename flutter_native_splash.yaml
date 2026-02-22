@@ -1,0 +1,19 @@
+flutter_native_splash:
+  # ===================== FOR ALL PLATFORM, except Android 12+ =====================
+  color: "#FFFFFF"                 # Background color (6-digit HEX)
+  image: "assets/images/logo-soma.jpg"   # Pastikan ini PNG dan ada di folder assets
+  fullscreen: true
+
+  # ===================== ANDROID 12+ CONFIGURATION =====================
+  android_12:
+    color: "#FFFFFF"                 # Splash background color
+    image: "assets/images/logo-soma.jpg"   # Logo untuk Android 12+
+    icon_background_color: "#FFFFFF"       # Background di belakang logo
+
+# ===================== OPTIONAL: dark mode =====================
+# color_dark: "#042a49"
+# image_dark: "assets/images/logo-soma-dark.png"
+# android_12:
+#   color_dark: "#042a49"
+#   image_dark: "assets/images/logo-soma-dark.png"
+#   icon_background_color_dark: "#042a49"

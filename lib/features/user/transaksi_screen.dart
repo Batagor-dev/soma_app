@@ -5,10 +5,8 @@ class TransaksiScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Halaman Transaksi'),
-      ),
+    return const Center(
+      child: Text('Halaman Transaksi'),
     );
   }
 }
