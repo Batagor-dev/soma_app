@@ -61,4 +61,15 @@ class AuthService {
       return false;
     }
   }
+
+  Future<void> logout() async {
+    try {
+      await _dio.post("/auth/logout"); // kalau backend ada endpoint logout
+    } catch (_) {}
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("token");
+
+    _dio.options.headers.remove("Authorization");
+  }
 }

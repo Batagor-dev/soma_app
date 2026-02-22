@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // Route awal
-      initialRoute: Routes.splash,
+      initialRoute: Routes.login,
 
       // Semua route terdaftar di sini
       routes: Routes.routes,

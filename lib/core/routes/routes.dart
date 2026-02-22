@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 
-
-import '../../features/splash/splash_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/register_screen.dart';
 import '../../features/user/home_screen.dart';
+import '../../features/user/produk_screen.dart';
+import '../../features/user/transaksi_screen.dart';
+import '../../features/user/pengaturan_screen.dart';
+import '../../features/user/kasir_screen.dart';
 
 class Routes {
-  static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
+  static const String produk = '/produk';
+  static const String transaksi = '/transaksi';
+  static const String pengaturan = '/pengaturan';
+  static const String kasir = '/kasir';
 
   static Map<String, WidgetBuilder> routes = {
-    splash: (_) => const SplashScreen(),
     login: (_) => const LoginScreen(),
     register: (_) => const RegisterScreen(),
     home: (_) => const HomeScreen(),
+    produk: (_) => const ProdukScreen(),
+    transaksi: (_) => const TransaksiScreen(),
+    pengaturan: (_) => const PengaturanScreen(),
+    kasir: (_) => const KasirScreen(),
   };
 }
