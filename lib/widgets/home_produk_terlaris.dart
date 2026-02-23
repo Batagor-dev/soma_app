@@ -6,6 +6,9 @@ class HomeProdukTerlaris extends StatelessWidget {
   final String nama;
   final String harga;
   final String imageUrl;
+  final String? kategori;
+  final int? totalTerjual;
+  final double? rating;
   final bool isLoading;
 
   const HomeProdukTerlaris({
@@ -13,6 +16,9 @@ class HomeProdukTerlaris extends StatelessWidget {
     required this.nama,
     required this.harga,
     required this.imageUrl,
+    this.kategori,
+    this.totalTerjual,
+    this.rating,
     this.isLoading = false,
   });
 
@@ -33,6 +39,15 @@ class HomeProdukTerlaris extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatTerjual(int? jumlah) {
+    if (jumlah == null || jumlah == 0) return "0";
+    if (jumlah >= 1000) {
+      final ribuan = jumlah / 1000;
+      return '${ribuan.toStringAsFixed(1)}rb';
+    }
+    return jumlah.toString();
   }
 
   @override
@@ -62,19 +77,12 @@ class HomeProdukTerlaris extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Image skeleton dengan ukuran yang proporsional
           _skeletonBox(height: 120, width: double.infinity, radius: 12),
           const SizedBox(height: 8),
-
-          /// Nama skeleton
           _skeletonBox(height: 12, width: 100),
           const SizedBox(height: 6),
-
-          /// Harga skeleton
           _skeletonBox(height: 14, width: 80),
           const SizedBox(height: 6),
-
-          /// Rating skeleton
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -93,7 +101,6 @@ class HomeProdukTerlaris extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// Image Container dengan aspect ratio 1:1
         ClipRRect(
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(20),
@@ -103,104 +110,80 @@ class HomeProdukTerlaris extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                /// Image
-                Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return Container(
-                      color: Colors.grey.shade100,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                /// Image dengan fallback
+                if (imageUrl.startsWith('http'))
+                  Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) {
+                      return _buildErrorImage();
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return _buildLoadingImage(loadingProgress);
+                    },
+                  )
+                else
+                  // Untuk asset image
+                  Image.asset(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) {
+                      return _buildErrorImage();
+                    },
+                  ),
+
+                /// Badge kategori jika ada
+                if (kategori != null && kategori!.isNotEmpty)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade600,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.amber.shade200,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Remix.image_line,
-                            size: 40,
-                            color: Colors.grey.shade400,
+                            Remix.fire_fill,
+                            size: 10,
+                            color: Colors.white,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(width: 4),
                           Text(
-                            'Gambar tidak\ntersedia',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey.shade500,
+                            kategori!,
+                            style: const TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Colors.grey.shade100,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                          strokeWidth: 2,
-                          color: Colors.green.shade400,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-
-                /// Badge "Terlaris" di pojok kiri atas gambar
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade600,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.amber.shade200,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Remix.fire_fill,
-                          size: 10,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Terlaris',
-                          style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                ),
               ],
             ),
           ),
         ),
-
-        /// Content container dengan padding yang lebih kecil
         Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Nama produk dengan icon
+              /// Nama produk
               Row(
                 children: [
                   Expanded(
@@ -232,7 +215,7 @@ class HomeProdukTerlaris extends StatelessWidget {
               ),
               const SizedBox(height: 4),
 
-              /// Harga dengan desain lebih menarik
+              /// Harga
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
@@ -259,10 +242,9 @@ class HomeProdukTerlaris extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 6),
 
-              /// Rating dan jumlah terjual (simulasi)
+              /// Rating dan jumlah terjual
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -273,7 +255,7 @@ class HomeProdukTerlaris extends StatelessWidget {
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    "4.8",
+                    (rating ?? 4.8).toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
@@ -288,7 +270,7 @@ class HomeProdukTerlaris extends StatelessWidget {
                   ),
                   const SizedBox(width: 3),
                   Text(
-                    "1.2rb",
+                    _formatTerjual(totalTerjual),
                     style: TextStyle(
                       fontSize: 9,
                       color: Colors.grey.shade600,
@@ -300,6 +282,47 @@ class HomeProdukTerlaris extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildErrorImage() {
+    return Container(
+      color: Colors.grey.shade100,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Remix.image_line,
+            size: 40,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Gambar tidak\ntersedia',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingImage(ImageChunkEvent loadingProgress) {
+    return Container(
+      color: Colors.grey.shade100,
+      child: Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+          strokeWidth: 2,
+          color: Colors.green.shade400,
+        ),
+      ),
     );
   }
 }
@@ -322,7 +345,6 @@ class ProdukTerlarisHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          /// Header dengan icon dan gradasi
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               colors: [Color(0xFFFF6B00), Color(0xFFFFA726)],
@@ -360,68 +382,25 @@ class ProdukTerlarisHeader extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Warna akan diganti oleh ShaderMask
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-
-          /// Tombol "Lihat Semua"
           if (!isLoading)
             GestureDetector(
               onTap: onSeeAllPressed,
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E0),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFFFA726).withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "Lihat Semua",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFFF6B00),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Remix.arrow_right_s_line,
-                      size: 14,
-                      color: const Color(0xFFFF6B00),
-                    ),
-                  ],
-                ),
               ),
             )
-          else
-            _skeletonBox(height: 30, width: 90, radius: 20),
         ],
       ),
     );
   }
 
-  Widget _skeletonBox(
-      {double height = 12, double width = double.infinity, double radius = 8}) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(radius),
-        ),
-      ),
-    );
-  }
+  
 }

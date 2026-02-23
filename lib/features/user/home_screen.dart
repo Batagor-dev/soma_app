@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoading = false;
       });
     } catch (e) {
+      print('Error fetching home data: $e');
       setState(() => isLoading = false);
     }
   }
@@ -54,14 +55,52 @@ class _HomeScreenState extends State<HomeScreen> {
     return format.format(value);
   }
 
+  String _getImageUrl(dynamic item) {
+    if (item is Map && item.containsKey('foto')) {
+      final foto = item['foto'];
+      if (foto != null && foto.toString().isNotEmpty) {
+        if (foto.toString().startsWith('http')) {
+          return foto.toString();
+        }
+        // gunakan baseUrl API
+        return 'http://127.0.0.1:8000/storage/$foto';
+      }
+    }
+    return "assets/images/no-image.jpg";
+  }
+
+  // Fungsi untuk parsing total_terjual dengan aman
+  int _parseTotalTerjual(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
+    if (value is double) return value.toInt();
+    return 0;
+  }
+
+  // Fungsi untuk parsing harga dengan aman (handle desimal)
+  int _parseHarga(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) {
+      // Hapus titik desimal dan hanya ambil angka bulat
+      final cleanValue = value.split('.').first;
+      return int.tryParse(cleanValue) ?? 0;
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final summary = homeData?['summary'] ?? {};
     final pemasukan = summary['pemasukan'] ?? {};
     final pengeluaran = summary['pengeluaran'] ?? {};
-    // final produkTerlaris = homeData?['produk_terlaris'] ?? [];
-    final stokTerbaru = homeData?['stok_terbaru'] ?? [];
-    final transaksiList = homeData?['transaksi_terbaru'] ?? [];
+    final produkTerlaris = homeData?['produk_terlaris'] as List? ?? [];
+    final stokTerbaru = homeData?['stok_terbaru'] as List? ?? [];
+    final transaksiList = homeData?['transaksi_terbaru'] as List? ?? [];
 
     return Scaffold(
       backgroundColor: const Color(0xffF5F5F5),
@@ -71,15 +110,13 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-
               /// ===== SUMMARY =====
               Row(
                 children: [
                   Expanded(
                     child: SummaryCard(
                       title: "Pemasukan",
-                      date: homeData?['greeting'] ?? "",
+                      date: "Hari Ini",
                       todayAmount:
                           isLoading ? "" : formatRupiah(pemasukan['harian']),
                       totalAmount:
@@ -89,11 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       isLoading: isLoading,
                     ),
                   ),
-                  // const SizedBox(width: 3),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: SummaryCard(
                       title: "Pengeluaran",
-                      date: homeData?['greeting'] ?? "",
+                      date: "Hari Ini",
                       todayAmount:
                           isLoading ? "" : formatRupiah(pengeluaran['harian']),
                       totalAmount:
@@ -109,45 +146,73 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               /// ===== PRODUK TERLARIS =====
-              const Padding(
-                padding: EdgeInsets.only(left: 4),
-                child: Text(
-                  "Produk Terlaris",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              ProdukTerlarisHeader(
+                onSeeAllPressed: () {
+                  // Navigasi ke halaman semua produk terlaris
+                },
+                isLoading: isLoading,
               ),
 
               const SizedBox(height: 12),
 
               SizedBox(
-                height: 250, // minimal tinggi supaya card muat
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    HomeProdukTerlaris(
-                      nama: "Espresso Arabica",
-                      harga: "Rp 25.000",
-                      imageUrl: "assets/images/produk/contoh.jpeg",
-                      isLoading: isLoading,
-                    ),
-                    HomeProdukTerlaris(
-                      nama: "Cappuccino Latte",
-                      harga: "Rp 30.000",
-                      imageUrl: "assets/images/produk/contoh.jpeg",
-                      isLoading: isLoading,
-                    ),
-                    HomeProdukTerlaris(
-                      nama: "Croissant Butter",
-                      harga: "Rp 18.000",
-                      imageUrl: "assets/images/produk/contoh.jpeg",
-                      isLoading: isLoading,
-                    ),
-                  ],
-                ),
+                height: 260,
+                child: isLoading
+                    ? ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 3,
+                        itemBuilder: (context, index) =>
+                            const HomeProdukTerlaris(
+                          nama: "",
+                          harga: "",
+                          imageUrl: "",
+                          isLoading: true,
+                        ),
+                      )
+                    : produkTerlaris.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Belum ada produk terlaris',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: produkTerlaris.length,
+                            itemBuilder: (context, index) {
+                              final item = produkTerlaris[index];
+
+                              // Parse data dengan aman
+                              final nama = item['nama']?.toString() ?? 'Produk';
+                              final hargaValue = _parseHarga(item['harga']);
+                              final totalTerjual =
+                                  _parseTotalTerjual(item['total_terjual']);
+
+                              // Ambil kategori jika ada
+                              String? kategori;
+                              if (item['kategori'] is Map) {
+                                kategori = item['kategori']['nama']?.toString();
+                              } else if (item['kategori_id'] != null) {
+                                // Jika hanya punya kategori_id
+                                kategori = 'Kategori ${item['kategori_id']}';
+                              }
+
+                              return HomeProdukTerlaris(
+                                nama: nama,
+                                harga: formatRupiah(hargaValue),
+                                imageUrl: _getImageUrl(item),
+                                kategori: kategori,
+                                totalTerjual: totalTerjual,
+                                rating:
+                                    4.8, // Bisa diganti dengan data real jika ada
+                                isLoading: false,
+                              );
+                            },
+                          ),
               ),
+
               const SizedBox(height: 20),
 
               /// ===== STOCK SECTION =====
@@ -158,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // Last Transaction
+              /// ===== LAST TRANSACTION =====
               HomeTransaction(
                 transaksiList: transaksiList,
                 isLoading: isLoading,
