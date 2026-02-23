@@ -4,6 +4,9 @@ flutter_native_splash:
   image: "assets/images/logo-soma.jpg"   # Pastikan ini PNG dan ada di folder assets
   fullscreen: true
 
+  android_gravity: center
+  ios_content_mode: center
+
   # ===================== ANDROID 12+ CONFIGURATION =====================
   android_12:
     color: "#FFFFFF"                 # Splash background color

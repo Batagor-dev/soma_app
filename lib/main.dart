@@ -1,33 +1,30 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/routes/routes.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+
+  final prefs = await SharedPreferences.getInstance();
+  final isLogin = prefs.getBool('isLogin') ?? false;
+
+  runApp(MyApp(isLogin: isLogin));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLogin;
+  const MyApp({super.key, required this.isLogin});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      // Route awal
-      initialRoute: Routes.login,
-
-      // Semua route terdaftar di sini
+      initialRoute: isLogin ? Routes.home : Routes.login,
       routes: Routes.routes,
-
-      // Optional: fallback kalau route tidak ditemukan
       onUnknownRoute: (settings) {
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
-            body: Center(
-              child: Text("Route Not Found"),
-            ),
+            body: Center(child: Text("Route Not Found")),
           ),
         );
       },
