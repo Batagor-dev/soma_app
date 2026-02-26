@@ -77,6 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: nameController,
                   hint: "Masukkan nama lengkap",
                   errorText: nameError,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 20),
 
@@ -91,6 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: usernameController,
                   hint: "Masukkan username",
                   errorText: usernameError,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 20),
 
@@ -105,6 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: emailController,
                   hint: "Masukkan email",
                   errorText: emailError,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 20),
 

@@ -51,6 +51,31 @@ class HomeProdukTerlaris extends StatelessWidget {
   }
 
   @override
+    Widget _buildNoImage() {
+    return Container(
+      color: Colors.grey.shade100,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Remix.image_line,
+            size: 40,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'No Image',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
     return Container(
       width: 150,
@@ -129,7 +154,7 @@ class HomeProdukTerlaris extends StatelessWidget {
                     imageUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) {
-                      return _buildErrorImage();
+                      return _buildNoImage();
                     },
                   ),
 

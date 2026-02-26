@@ -14,6 +14,7 @@ class InputText extends StatelessWidget {
   final double borderWidth;
   final Color focusedBorderColor;
   final String? errorText; // <--- baru
+  final TextInputType? keyboardType; // TAMBAH INI
 
   const InputText({
     super.key,
@@ -26,7 +27,8 @@ class InputText extends StatelessWidget {
     this.borderColor = AppColors.surface,
     this.borderWidth = 1.0,
     this.focusedBorderColor = AppColors.surface,
-    this.errorText, // <--- baru
+    this.errorText, 
+    this.keyboardType, // TAMBAH INI
   });
 
   @override
@@ -35,6 +37,7 @@ class InputText extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscure,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.roboto(

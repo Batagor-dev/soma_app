@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/routes/routes.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
-  final isLogin = prefs.getBool('isLogin') ?? false;
+  await initializeDateFormatting('id_ID', null);
+  final token = prefs.getString('token');
 
-  runApp(MyApp(isLogin: isLogin));
+  runApp(MyApp(isLogin: token != null));
 }
 
 class MyApp extends StatelessWidget {
@@ -18,16 +22,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       initialRoute: isLogin ? Routes.home : Routes.login,
       routes: Routes.routes,
-      onUnknownRoute: (settings) {
-        return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text("Route Not Found")),
-          ),
-        );
-      },
     );
   }
 }
