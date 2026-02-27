@@ -127,4 +127,45 @@ class AuthService {
       throw Exception("Gagal mengambil data me");
     }
   }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final response = await _dio.put(
+        "/auth/change-password",
+        data: {
+          "current_password": currentPassword,
+          "new_password": newPassword,
+          "new_password_confirmation": confirmPassword,
+        },
+      );
+
+      return {
+        "success": true,
+        "message": response.data["message"],
+      };
+    } on DioException catch (e) {
+      final data = e.response?.data;
+
+      if (data?["errors"] != null) {
+        final errors = data["errors"];
+
+        if (errors["current_password"] != null) {
+          throw Exception(errors["current_password"][0]);
+        }
+        if (errors["new_password"] != null) {
+          throw Exception(errors["new_password"][0]);
+        }
+      }
+
+      if (data?["message"] != null) {
+        throw Exception(data["message"]);
+      }
+
+      throw Exception("Gagal mengganti password");
+    }
+  }
 }
