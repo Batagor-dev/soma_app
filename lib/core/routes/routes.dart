@@ -9,6 +9,8 @@ import '../../features/user/transaksi_screen.dart';
 import '../../features/user/transaksi/history_screen.dart';
 import '../../features/user/transaksi/pengeluaran_screen.dart';
 import '../../features/user/transaksi/transaksi_detail_screen.dart';
+import '../../features/user/acount/edit_profile_screen.dart';
+import '../../features/user/acount/ganti_password_screen.dart';
 
 class Routes {
   static const String login = '/login';
@@ -24,6 +26,8 @@ class Routes {
   static const String history = '/history';
   static const String pengeluaran = '/pengeluaran';
   static const String transaksiDetail = '/transaksi-detail';
+  static const String editProfile = '/edit-profile';
+  static const String gantiPassword = '/ganti-password';
 
   static Map<String, WidgetBuilder> routes = {
     login: (_) => const LoginScreen(),
@@ -36,5 +40,7 @@ class Routes {
     history: (_) => const HistoryScreen(),
     pengeluaran: (_) => const PengeluaranScreen(),
     transaksiDetail: (_) => const TransaksiDetailScreen(),
+    editProfile: (_) => const EditProfileScreen(),
+    gantiPassword: (_) => const GantiPasswordScreen(),
   };
 }
