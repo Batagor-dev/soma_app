@@ -2,7 +2,12 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:remixicon/remixicon.dart';
+import 'package:shimmer/shimmer.dart';
+
 import '../../../core/services/produk_service.dart';
+import '../../../widgets/input_text.dart';
+import '../../../widgets/button_auth.dart';
 
 class TambahProduk extends StatefulWidget {
   const TambahProduk({super.key});
@@ -26,6 +31,13 @@ class _TambahProdukState extends State<TambahProduk> {
   XFile? _pickedFile;
 
   bool _isLoading = false;
+  String _lastHargaValue = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _hargaController.addListener(_formatHarga);
+  }
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -37,6 +49,48 @@ class _TambahProdukState extends State<TambahProduk> {
         _imageBytes = bytes;
       });
     }
+  }
+
+  void _formatHarga() {
+    final text = _hargaController.text;
+    if (text.isEmpty) {
+      _lastHargaValue = '';
+      return;
+    }
+
+    final numeric = text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (numeric.isEmpty) {
+      _hargaController.value = const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+      _lastHargaValue = '';
+      return;
+    }
+
+    if (text == _lastHargaValue) return;
+
+    final number = int.parse(numeric);
+    final formatted = formatRupiah(number);
+
+    _hargaController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+
+    _lastHargaValue = formatted;
+  }
+
+  String formatRupiah(int number) {
+    return "Rp ${number.toString().replaceAllMapped(
+          RegExp(r'\B(?=(\d{3})+(?!\d))'),
+          (match) => '.',
+        )}";
+  }
+
+  int parseRupiah(String text) {
+    final clean = text.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(clean) ?? 0;
   }
 
   Future<void> _submit() async {
@@ -55,7 +109,7 @@ class _TambahProdukState extends State<TambahProduk> {
       kategoriId: _kategoriId!,
       nama: _namaController.text.trim(),
       deskripsi: _deskripsiController.text.trim(),
-      harga: int.tryParse(_hargaController.text) ?? 0,
+      harga: parseRupiah(_hargaController.text),
       stok: int.tryParse(_stokController.text) ?? 0,
       fotoPath: kIsWeb ? null : _pickedFile?.path,
     );
@@ -63,7 +117,6 @@ class _TambahProdukState extends State<TambahProduk> {
     setState(() => _isLoading = false);
 
     if (result != null && result["success"] == true) {
-      // balik ke screen sebelumnya dan kirim flag refresh
       Navigator.pop(context, true);
     } else {
       final errorMessage =
@@ -78,8 +131,134 @@ class _TambahProdukState extends State<TambahProduk> {
     }
   }
 
+  Widget _skeletonBox({double height = 56}) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const SizedBox(height: 20),
+          _skeletonBox(height: 160),
+          const SizedBox(height: 20),
+          _skeletonBox(),
+          const SizedBox(height: 18),
+          _skeletonBox(),
+          const SizedBox(height: 18),
+          _skeletonBox(),
+          const SizedBox(height: 18),
+          _skeletonBox(),
+          const SizedBox(height: 18),
+          _skeletonBox(height: 60),
+          const SizedBox(height: 32),
+          _skeletonBox(height: 50),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 160,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: _imageBytes != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.memory(
+                          _imageBytes!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : const Center(
+                        child: Text("Tap untuk pilih gambar"),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            InputText(
+              controller: _namaController,
+              hint: "Nama Produk",
+              icon: Icons.shopping_bag_outlined,
+              errorText: null,
+            ),
+            const SizedBox(height: 18),
+            InputText(
+              controller: _deskripsiController,
+              hint: "Deskripsi Produk",
+              icon: Icons.description_outlined,
+              errorText: null,
+            ),
+            const SizedBox(height: 18),
+            InputText(
+              controller: _hargaController,
+              hint: "Harga Produk",
+              icon: Icons.attach_money,
+              keyboardType: TextInputType.number,
+              errorText: null,
+            ),
+            const SizedBox(height: 18),
+            InputText(
+              controller: _stokController,
+              hint: "Stok Produk",
+              icon: Icons.inventory_2_outlined,
+              keyboardType: TextInputType.number,
+              errorText: null,
+            ),
+            const SizedBox(height: 18),
+            DropdownButtonFormField<int>(
+              value: _kategoriId,
+              items: const [
+                DropdownMenuItem(value: 1, child: Text("Makanan")),
+                DropdownMenuItem(value: 2, child: Text("Minuman")),
+              ],
+              onChanged: (value) {
+                setState(() => _kategoriId = value);
+              },
+              decoration: InputDecoration(
+                labelText: "Kategori Produk",
+                prefixIcon: const Icon(Icons.category_outlined),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            ButtonAuth(
+              text: "Simpan Produk",
+              isLoading: false,
+              onPressed: _submit,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
+    _hargaController.removeListener(_formatHarga);
     _namaController.dispose();
     _deskripsiController.dispose();
     _hargaController.dispose();
@@ -91,99 +270,40 @@ class _TambahProdukState extends State<TambahProduk> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tambah Produk"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 160,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: _imageBytes != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.memory(
-                            _imageBytes!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : const Center(
-                          child: Text("Tap untuk pilih gambar"),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _namaController,
-                decoration: const InputDecoration(labelText: "Nama Produk"),
-                validator: (v) =>
-                    v == null || v.isEmpty ? "Nama wajib diisi" : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _deskripsiController,
-                decoration: const InputDecoration(labelText: "Deskripsi"),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _hargaController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: "Harga"),
-                validator: (v) =>
-                    v == null || v.isEmpty ? "Harga wajib diisi" : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _stokController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: "Stok"),
-                validator: (v) =>
-                    v == null || v.isEmpty ? "Stok wajib diisi" : null,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<int>(
-                value: _kategoriId,
-                items: const [
-                  DropdownMenuItem(value: 1, child: Text("Makanan")),
-                  DropdownMenuItem(value: 2, child: Text("Minuman")),
-                ],
-                onChanged: (value) {
-                  setState(() => _kategoriId = value);
-                },
-                decoration: const InputDecoration(
-                  labelText: "Kategori Produk",
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text("Simpan Produk"),
-              ),
-            ],
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          child: IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            icon: const Icon(Remix.arrow_left_line, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
+        title: const Text(
+          "Tambah Produk",
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1E88E5), Color(0xFF42A5F5)],
+            ),
+          ),
+        ),
+        elevation: 0,
+        toolbarHeight: 70,
+      ),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _isLoading ? _buildSkeleton() : _buildForm(),
       ),
     );
   }

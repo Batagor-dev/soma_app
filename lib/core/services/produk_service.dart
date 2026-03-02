@@ -16,16 +16,6 @@ Future<Map<String, dynamic>?> getProduk({int? kategoriId}) async {
     }
   }
 
-  // GET DETAIL
-  Future<Map<String, dynamic>?> getDetail(int id) async {
-    try {
-      final response = await _dio.get("/produk/$id");
-      return response.data;
-    } on DioException catch (e) {
-      print(e.response?.data);
-      return null;
-    }
-  }
 
   // CREATE (pakai FormData karena ada foto)
   Future<Map<String, dynamic>?> createProduk({
@@ -53,6 +43,16 @@ Future<Map<String, dynamic>?> getProduk({int? kategoriId}) async {
     }
   }
 
+  Future<Map<String, dynamic>?> getDetail(int id) async {
+    try {
+      final response = await _dio.get("/produk/$id");
+      return response.data;
+    } on DioException catch (e) {
+      print(e.response?.data);
+      return null;
+    }
+  }
+
   // UPDATE
   Future<Map<String, dynamic>?> updateProduk({
     required int id,
@@ -70,8 +70,7 @@ Future<Map<String, dynamic>?> getProduk({int? kategoriId}) async {
         if (deskripsi != null) "deskripsi": deskripsi,
         if (harga != null) "harga": harga,
         if (stok != null) "stok": stok,
-        if (fotoPath != null)
-          "foto": await MultipartFile.fromFile(fotoPath),
+        if (fotoPath != null) "foto": await MultipartFile.fromFile(fotoPath),
       });
 
       final response =

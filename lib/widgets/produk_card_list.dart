@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:intl/intl.dart';
+import '../../core/routes/routes.dart';
 
 class ProdukCardList extends StatelessWidget {
   final Future<Map<String, dynamic>?> produkFuture;
   final Function(int id) onDelete;
   final Function(int id) onEdit;
+  final Function(int id) onRestok;
   final VoidCallback onAdd;
   final Function()? onSeeAllPressed;
 
@@ -15,6 +17,7 @@ class ProdukCardList extends StatelessWidget {
     required this.produkFuture,
     required this.onDelete,
     required this.onEdit,
+    required this.onRestok,
     required this.onAdd,
     this.onSeeAllPressed,
   });
@@ -501,6 +504,26 @@ class ProdukCardList extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 243, 200, 130),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Remix.add_circle_line,
+                            size: 16,
+                            color: Colors.orange.shade700,
+                          ),
+                           onPressed: () =>onRestok(id),
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.blue.shade50,

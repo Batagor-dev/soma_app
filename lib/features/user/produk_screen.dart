@@ -103,7 +103,7 @@ class _ProdukScreenState extends State<ProdukScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Section Filter dengan desain modern
-               KategoriFilter(
+                KategoriFilter(
                   kategoriFuture: _kategoriFuture,
                   selectedKategoriId: _selectedKategoriId,
                   selectedKategoriName: _selectedKategoriName,
@@ -117,7 +117,6 @@ class _ProdukScreenState extends State<ProdukScreen> {
                   onReset: _resetFilter,
                 ),
 
-
                 const SizedBox(height: 12),
 
                 // Produk List
@@ -126,13 +125,26 @@ class _ProdukScreenState extends State<ProdukScreen> {
                     produkFuture: _produkFuture,
                     onDelete: _handleDelete,
                     onAdd: _handleAdd,
-                    onEdit: (produk) {
-                      Navigator.pushNamed(context, Routes.editProduk);
+                    onEdit: (id) {
+                      Navigator.pushNamed(
+                        context,
+                        Routes.editProduk,
+                        arguments: id,
+                      ).then((_) {
+                        _refreshProduk();
+                      });
+                    },
+                    onRestok: (id) {
+                      Navigator.pushNamed(
+                        context,
+                        Routes.restokProduk,
+                        arguments: id,
+                      ).then((_) {
+                        _refreshProduk();
+                      });
                     },
                   ),
                 ),
-
-              
               ],
             ),
           ),
