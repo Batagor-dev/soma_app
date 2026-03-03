@@ -31,12 +31,23 @@ class _TambahProdukState extends State<TambahProduk> {
   XFile? _pickedFile;
 
   bool _isLoading = false;
+  bool _isInitialLoading = true;
   String _lastHargaValue = '';
 
   @override
   void initState() {
     super.initState();
     _hargaController.addListener(_formatHarga);
+    _simulateInitialLoading();
+  }
+
+  Future<void> _simulateInitialLoading() async {
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) {
+      setState(() {
+        _isInitialLoading = false;
+      });
+    }
   }
 
   Future<void> _pickImage() async {
@@ -131,9 +142,40 @@ class _TambahProdukState extends State<TambahProduk> {
     }
   }
 
-  Widget _skeletonBox({double height = 56}) {
+  // Widget skeleton untuk image picker dengan aspek 1:1
+  Widget _buildSkeletonImage() {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image_outlined, color: Colors.grey.shade400),
+              const SizedBox(width: 8),
+              Text(
+                "Memuat...",
+                style: TextStyle(color: Colors.grey.shade400),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget skeleton untuk setiap item form
+  Widget _buildSkeletonItem(
+      {double height = 56, double width = double.infinity}) {
     return Container(
       height: height,
+      width: width,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -141,7 +183,60 @@ class _TambahProdukState extends State<TambahProduk> {
     );
   }
 
-  Widget _buildSkeleton() {
+  // Widget skeleton untuk dropdown
+  Widget _buildSkeletonDropdown() {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Icon(Icons.category_outlined, color: Colors.grey.shade400, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Kategori Produk",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Container(
+                  height: 14,
+                  width: 100,
+                  color: Colors.grey.shade300,
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.arrow_drop_down, color: Colors.grey.shade400),
+        ],
+      ),
+    );
+  }
+
+  // Widget skeleton untuk button
+  Widget _buildSkeletonButton() {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
+  // Skeleton utama
+  Widget _buildEnhancedSkeleton() {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
@@ -149,20 +244,91 @@ class _TambahProdukState extends State<TambahProduk> {
         padding: const EdgeInsets.all(20),
         children: [
           const SizedBox(height: 20),
-          _skeletonBox(height: 160),
+
+          // Skeleton Image Picker dengan aspek 1:1
+          Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width -
+                  40, // Full width dengan padding
+              child: _buildSkeletonImage(),
+            ),
+          ),
           const SizedBox(height: 20),
-          _skeletonBox(),
+
+          // Skeleton Nama Produk
+          _buildSkeletonItem(),
           const SizedBox(height: 18),
-          _skeletonBox(),
+
+          // Skeleton Deskripsi
+          _buildSkeletonItem(),
           const SizedBox(height: 18),
-          _skeletonBox(),
+
+          // Skeleton Harga
+          _buildSkeletonItem(),
           const SizedBox(height: 18),
-          _skeletonBox(),
+
+          // Skeleton Stok
+          _buildSkeletonItem(),
           const SizedBox(height: 18),
-          _skeletonBox(height: 60),
+
+          // Skeleton Dropdown Kategori
+          _buildSkeletonDropdown(),
           const SizedBox(height: 32),
-          _skeletonBox(height: 50),
+
+          // Skeleton Button
+          _buildSkeletonButton(),
         ],
+      ),
+    );
+  }
+
+  // Image Picker dengan aspek 1:1
+  Widget _buildImagePicker() {
+    return GestureDetector(
+      onTap: _pickImage,
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+            color: Colors.grey.shade50,
+          ),
+          child: _imageBytes != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    _imageBytes!,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.image_outlined,
+                        size: 40,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Tap untuk pilih gambar",
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Rasio 1:1 (persegi)",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
       ),
     );
   }
@@ -175,28 +341,18 @@ class _TambahProdukState extends State<TambahProduk> {
         child: ListView(
           children: [
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 160,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: _imageBytes != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.memory(
-                          _imageBytes!,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : const Center(
-                        child: Text("Tap untuk pilih gambar"),
-                      ),
+
+            // Image Picker dengan aspek 1:1
+            Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width -
+                    40, // Full width dengan padding
+                child: _buildImagePicker(),
               ),
             ),
             const SizedBox(height: 20),
+
+            // Nama Produk
             InputText(
               controller: _namaController,
               hint: "Nama Produk",
@@ -204,6 +360,8 @@ class _TambahProdukState extends State<TambahProduk> {
               errorText: null,
             ),
             const SizedBox(height: 18),
+
+            // Deskripsi Produk
             InputText(
               controller: _deskripsiController,
               hint: "Deskripsi Produk",
@@ -211,6 +369,8 @@ class _TambahProdukState extends State<TambahProduk> {
               errorText: null,
             ),
             const SizedBox(height: 18),
+
+            // Harga Produk
             InputText(
               controller: _hargaController,
               hint: "Harga Produk",
@@ -219,6 +379,8 @@ class _TambahProdukState extends State<TambahProduk> {
               errorText: null,
             ),
             const SizedBox(height: 18),
+
+            // Stok Produk
             InputText(
               controller: _stokController,
               hint: "Stok Produk",
@@ -227,6 +389,8 @@ class _TambahProdukState extends State<TambahProduk> {
               errorText: null,
             ),
             const SizedBox(height: 18),
+
+            // Kategori Dropdown
             DropdownButtonFormField<int>(
               value: _kategoriId,
               items: const [
@@ -238,16 +402,29 @@ class _TambahProdukState extends State<TambahProduk> {
               },
               decoration: InputDecoration(
                 labelText: "Kategori Produk",
+                labelStyle: TextStyle(color: Colors.grey.shade700),
                 prefixIcon: const Icon(Icons.category_outlined),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1E88E5), width: 2),
                 ),
               ),
             ),
             const SizedBox(height: 32),
+
+            // Button Simpan
             ButtonAuth(
               text: "Simpan Produk",
-              isLoading: false,
+              isLoading: _isLoading,
               onPressed: _submit,
             ),
           ],
@@ -303,7 +480,11 @@ class _TambahProdukState extends State<TambahProduk> {
       ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: _isLoading ? _buildSkeleton() : _buildForm(),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        child: _isLoading || _isInitialLoading
+            ? _buildEnhancedSkeleton()
+            : _buildForm(),
       ),
     );
   }
