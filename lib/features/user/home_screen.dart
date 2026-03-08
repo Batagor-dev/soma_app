@@ -20,6 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Map<String, dynamic>? homeData;
   bool isLoading = true;
+  
+  get foto => null;
 
   @override
   void initState() {
@@ -66,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return 'http://127.0.0.1:8000/storage/$foto';
       }
     }
-    return "assets/images/no-image.jpg";
+     return 'http://127.0.0.1:8000/storage/$foto';
   }
 
   // Fungsi untuk parsing total_terjual dengan aman

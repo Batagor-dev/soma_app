@@ -4,9 +4,6 @@ import '../network/dio_client.dart';
 class KasirService {
   final Dio _dio = DioClient().dio;
 
-  /// ===============================
-  /// GET PRODUK (Search + Filter)
-  /// ===============================
   Future<Map<String, dynamic>?> getProduk({
     String? search,
     int? kategoriId,
@@ -19,7 +16,7 @@ class KasirService {
       }
 
       if (kategoriId != null) {
-        query['kategori_id'] = kategoriId;
+        query['kategori_produk_id'] = kategoriId;
       }
 
       final response = await _dio.get(
@@ -29,14 +26,14 @@ class KasirService {
 
       return response.data;
     } on DioException catch (e) {
-      print(e.response?.data);
+      print('Error getProduk: ${e.response?.data}');
+      return null;
+    } catch (e) {
+      print('Error getProduk: $e');
       return null;
     }
   }
 
-  /// ===============================
-  /// CREATE TRANSAKSI
-  /// ===============================
   Future<Map<String, dynamic>?> createTransaksi({
     required List<Map<String, dynamic>> items,
     String? tanggal,
@@ -52,8 +49,12 @@ class KasirService {
 
       return response.data;
     } on DioException catch (e) {
-      print(e.response?.data);
-      return e.response?.data;
+      print('Error createTransaksi: ${e.response?.data}');
+      // Return response data jika ada, agar bisa ditampilkan errornya
+      return e.response?.data ?? {'success': false, 'message': 'Koneksi error'};
+    } catch (e) {
+      print('Error createTransaksi: $e');
+      return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
 }
